@@ -10,40 +10,46 @@ Created on Tue Jan 22 17:59:41 2019
 # implementing heapq library
 # =============================================================================
 
-import math
-from heapq import *
-
 class Graph:
-    def __init__(self, nodes, edges):
+    def __init__(self, edges = []):
+        self.nodes = set()
         self.edges = edges
-        self.nodes = nodes
-        self.neighbours = {node:[] for node in self.nodes} 
-        for u,v,w in edges:
-            self.neighbours[u].append((v,w))
-            self.neighbours[v].append((u,w))
-
-
-def Dijkstra(G,s):
-    tree = []
+        for edge in edges:
+            self.nodes.add(edge[0])
+            self.nodes.add(edge[1])
+        self.next = {n:set() for n in self.nodes}
+        for edge in edges:
+            self.next[edge[0]].add((edge[1], edge[2]))
+            self.next[edge[1]].add((edge[0], edge[2]))
+        
+        
+def Dijkstra(g, s):
+    dist = {}
+    res = []
+    seen = set()
     q = []
-    heapify(q)
-    seen = set([s])
-    for u, weight in G.neighbours[s]:
-        heappush(q,(weight, (s,u)))
-    
+    heapq.heapify(q)
+    for node in g.nodes:
+        if node != s:
+            heapq.heappush(q, (math.inf, node, None))
+            dist[node] = math.inf
+        else:
+            heapq.heappush(q, (0, s, None))
+            dist[s] = 0
+            
     while len(q) > 0:
-        weight, edge = heappop(q)
-        u,v = edge
-        if v in seen: continue
-        seen.add(v)
-        tree.append((u,v,weight))
-        for z, wz in G.neighbours[v]:
-            heappush(q, (weight+wz, (v,z)))
-    
-    return tree
+        cur_dist, u, pred = heapq.heappop(q)
+        if u in seen: continue
+        seen.add(u)
+        res.append((pred, u, cur_dist))
+        for v, edge_dist in g.next[u]:
+            if v in seen: continue
+            if (cur_dist + edge_dist) < dist[v]:
+                dist[v] = cur_dist + edge_dist
+                heapq.heappush(q, (dist[v], v, u))
+    return res
 
 def test():
-    nodes = ['a','b','e','f','s', 'c', 'g']
     edges = [('s','a',5),
              ('s','b',9),
              ('s','f',6),
@@ -54,6 +60,6 @@ def test():
              ('f','g',11),
              ('e','c',5),
              ('b','c',8),]
-    G = Graph(nodes, edges)
+    G = Graph(edges)
     
     return Dijkstra(G,'s')
