@@ -10,6 +10,9 @@ Created on Tue Jan 22 17:59:41 2019
 # implementing heapq library
 # =============================================================================
 
+import heapq
+import math
+
 class Graph:
     def __init__(self, edges = []):
         self.nodes = set()
